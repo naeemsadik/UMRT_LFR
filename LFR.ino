@@ -4,16 +4,17 @@
 #define LMneg 10
 #define EnableRM A0
 #define EnableLM A1
-#define s1 0
-#define s2 1
-#define s3 2
-#define s4 3
-#define s5 4
-#define s5 5
+#define middleSensor1 0
+#define middleSensor2 1
+#define rightSensor1 2
+#define rightSensor2 3
+#define leftSensor1 4
+#define leftSensor2 5
 
-int RMspeed = 200;
-int LMspeed = 200;
-
+void setMotorSpeed(int speed) {
+  analogWrite(EnableRM, speed);
+  analogWrite(EnableLM, speed);
+}
 
 void forward() {
   Serial.println("Going Forward...");
@@ -21,8 +22,7 @@ void forward() {
   digitalWrite(RMneg, LOW);
   digitalWrite(LMpos, LOW);
   digitalWrite(LMneg, HIGH);
-  analogWrite(EnableRM, RMspeed);  // Adjust the speed as needed
-  analogWrite(EnableLM, LMspeed);
+  setMotorSpeed(200);
 }
 
 void backward() {
@@ -31,8 +31,7 @@ void backward() {
   digitalWrite(RMneg, HIGH);
   digitalWrite(LMpos, HIGH);
   digitalWrite(LMneg, LOW);
-  analogWrite(EnableRM, RMspeed);  // Adjust the speed as needed
-  analogWrite(EnableLM, LMspeed);
+  setMotorSpeed(200);
 }
 
 void right() {
@@ -41,8 +40,7 @@ void right() {
   digitalWrite(RMneg, LOW);
   digitalWrite(LMpos, LOW);
   digitalWrite(LMneg, HIGH);
-  analogWrite(EnableRM, RMspeed);  // Adjust the speed as needed
-  analogWrite(EnableLM, LMspeed);
+  setMotorSpeed(200);
 }
 
 void left() {
@@ -51,54 +49,56 @@ void left() {
   digitalWrite(RMneg, LOW);
   digitalWrite(LMpos, LOW);
   digitalWrite(LMneg, LOW);
-  analogWrite(EnableRM, RMspeed);  // Adjust the speed as needed
-  analogWrite(EnableLM, LMspeed);
+  setMotorSpeed(200);
 }
 
 void stop() {
-  Serial.println("Stoping.....");
+  Serial.println("Stopping...");
   digitalWrite(RMpos, LOW);
   digitalWrite(RMneg, LOW);
   digitalWrite(LMpos, LOW);
   digitalWrite(LMneg, LOW);
-  analogWrite(EnableRM, 0);  // Adjust the speed as needed
-  analogWrite(EnableLM, 0);
+  setMotorSpeed(0);
 }
 
-void setup()
-{
+void setup() {
   Serial.begin(9600);
-  pinMode(RMpos,OUTPUT);
-  pinMode(LMpos,OUTPUT);
-  pinMode(RMneg,OUTPUT);
-  pinMode(LMneg,OUTPUT);
+  pinMode(RMpos, OUTPUT);
+  pinMode(LMpos, OUTPUT);
+  pinMode(RMneg, OUTPUT);
+  pinMode(LMneg, OUTPUT);
+
+  TCCR0B = TCCR0B & B11111000 | B00000010;
+
   pinMode(EnableRM, OUTPUT);
   pinMode(EnableLM, OUTPUT);
-  pinMode(s1, INPUT);
-  pinMode(s2, INPUT);
-  pinMode(s3, INPUT);
-  pinMode(s4, INPUT);
-  pinMode(s5, INPUT);
-  pinMode(s6, INPUT);
+  pinMode(middleSensor1, INPUT);
+  pinMode(middleSensor2, INPUT);
+  pinMode(rightSensor1, INPUT);
+  pinMode(rightSensor2, INPUT);
+  pinMode(leftSensor1, INPUT);
+  pinMode(leftSensor2, INPUT);
 }
 
-void loop()
-{
-  Serial.println(digitalread(s1));
-  forward();
-  delay(10000);
-  stop();
-  delay(1000);
-  backward();
-  delay(10000);
-  stop();
-  delay(1000);
-  right();
-  delay(10000);
-  stop();
-  delay(1000);
-  left();
-  delay(10000);
-  stop();
-  delay(1000);
+void loop() {
+  int middle1 = digitalRead(middleSensor1);
+  int middle2 = digitalRead(middleSensor2);
+  int right1 = digitalRead(rightSensor1);
+  int right2 = digitalRead(rightSensor2);
+  int left1 = digitalRead(leftSensor1);
+  int left2 = digitalRead(leftSensor2);
+
+  if (middle1 == 0 && middle2 == 0) {
+    forward();
+    delay(100);
+  } else if (right1 == 0 && right2 == 0) {
+    left();
+    delay(100);
+  } else if (left1 == 0 && left2 == 0) {
+    right();
+    delay(100);
+  } else {
+    stop();
+    delay(100);
+  }
 }
